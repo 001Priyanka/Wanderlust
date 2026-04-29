@@ -15,10 +15,8 @@
             <label for="description" class="form-label">Description</label>
          <textarea 
           name="listing[description]"
-          value="<%= listing.description %>"
           type="text" class="form-control"
-          required>
-        </textarea>
+          required><%= listing.description %></textarea>
              <div class="invalid-feedback">Provide a short description</div>
         </div>
 
@@ -28,7 +26,7 @@
          value="<%= listing.location %>" 
          type="text" class="form-control"
          required>
-           <div class="invalid-feedback">Provide valide Location</div>
+           <div class="invalid-feedback">Provide valid Location</div>
          </div>
 
          <div class="row">
@@ -38,7 +36,7 @@
          value="<%= listing.country %>" 
          type="text" class="form-control"
          required>
-           <div class="invalid-feedback">Provide valide Country</div>
+           <div class="invalid-feedback">Provide valid Country</div>
          </div>
 
          <div class="mb-3 col-md-8">
