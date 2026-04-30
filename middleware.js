@@ -27,6 +27,14 @@ module.exports.isOwner = async (req, res, next) => {
     next();
 };
 
+module.exports.isOwnerRole = (req, res, next) => {
+    if (!res.locals.currUser || res.locals.currUser.role !== 'owner') {
+        req.flash("error", "Only owners can perform this action!");
+        return res.redirect("/listings");
+    }
+    next();
+};
+
 module.exports.isReviewAuthor = async (req, res, next) => {
     let { id, reviewId } = req.params;
     let review = await Review.findById(reviewId);
