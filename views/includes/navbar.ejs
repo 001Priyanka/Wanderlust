@@ -9,13 +9,34 @@
       <div class="navbar-nav">
         <a class="nav-link" href="/">Home</a>
         <a class="nav-link" href="/listings">All Listings</a>
-        <a class="nav-link" href="/listings/new">New Listings</a>
+        <% if(currUser && currUser.role === 'owner') { %>
+          <a class="nav-link" href="/listings/new">New Listing</a>
+        <% } %>
       </div>
+
+      <div class="navbar-nav ms-auto">
+        <form class="d-flex" role="search" action="/listings" method="GET">
+          <input class="form-control me-2 search-input" type="search" placeholder="Search destinations" name="q">
+          <button class="btn btn-search" type="submit">
+            <i class="fa-solid fa-magnifying-glass"></i>Search
+          </button>
+        </form>
+      </div>
+
       <div class="navbar-nav ms-auto">
         <% if(!currUser) { %>
           <a class="nav-link" href="/signup"><b>Sign up</b></a>
           <a class="nav-link" href="/login"><b>Log in</b></a>
         <% } else { %>
+          <span class="nav-link text-muted">
+            <% if(currUser.role === 'owner') { %>
+              🏠
+            <% } else { %>
+              👤
+            <% } %>
+            <b><%= currUser.username %></b>
+            <span class="badge bg-secondary ms-1"><%= currUser.role %></span>
+          </span>
           <a class="nav-link" href="/logout"><b>Log out</b></a>
         <% } %>
       </div>

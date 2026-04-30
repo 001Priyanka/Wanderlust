@@ -1,7 +1,19 @@
 const Listing = require("../models/listing");
+const axios = require("axios");
 
 module.exports.index = async (req, res) => {
-    const allListings = await Listing.find({});
+    const { q } = req.query;
+    let query = {};
+    if (q) {
+        query = {
+            $or: [
+                { title: { $regex: q, $options: "i" } },
+                { location: { $regex: q, $options: "i" } },
+                { country: { $regex: q, $options: "i" } }
+            ]
+        };
+    }
+    const allListings = await Listing.find(query);
     res.render("listings/index.ejs", {allListings});
 };
 
@@ -28,8 +40,28 @@ module.exports.showListing = async(req, res) => {
 };
 
 module.exports.createListing = async (req, res, next) => {
+    // Geocoding
+    let location = req.body.listing.location;
+    let country = req.body.listing.country;
+    let geocodeResponse = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location + "," + country)}&format=json&limit=1`, {
+        headers: { 'User-Agent': 'AirbnbClone/1.0' }
+    });
+
+    let url = req.file.path;
+    let filename = req.file.filename;
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user._id;
+    newListing.image = { url, filename };
+
+    if (geocodeResponse.data.length > 0) {
+        const { lon, lat } = geocodeResponse.data[0];
+        newListing.geometry = { type: 'Point', coordinates: [parseFloat(lon), parseFloat(lat)] };
+    } else {
+        // Default to [0,0] if not found, or handle as error. 
+        // For now setting a fallback or throwing error might be better.
+        newListing.geometry = { type: 'Point', coordinates: [0, 0] };
+    }
+
     await newListing.save();
     req.flash("success", "New Listing Created!");
     res.redirect("/listings");
@@ -47,7 +79,29 @@ module.exports.renderEditForm = async (req, res) => {
 
 module.exports.updateListing = async (req, res) => {
     let {id} = req.params;
-    await Listing.findByIdAndUpdate(id, {...req.body.listing});
+    
+    // Check if location or country changed to re-geocode
+    let listing = await Listing.findById(id);
+    if (listing.location !== req.body.listing.location || listing.country !== req.body.listing.country) {
+        let location = req.body.listing.location;
+        let country = req.body.listing.country;
+        let geocodeResponse = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location + "," + country)}&format=json&limit=1`, {
+            headers: { 'User-Agent': 'AirbnbClone/1.0' }
+        });
+        if (geocodeResponse.data.length > 0) {
+            const { lon, lat } = geocodeResponse.data[0];
+            req.body.listing.geometry = { type: 'Point', coordinates: [parseFloat(lon), parseFloat(lat)] };
+        }
+    }
+
+    listing = await Listing.findByIdAndUpdate(id, {...req.body.listing});
+    
+    if(typeof req.file !== "undefined") {
+        let url = req.file.path;
+        let filename = req.file.filename;
+        listing.image = { url, filename };
+        await listing.save();
+    }
     res.redirect(`/listings/${id}`)
 };
 

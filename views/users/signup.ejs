@@ -23,7 +23,43 @@
                 <div class="invalid-feedback">Please enter a password.</div>
             </div>
 
+            <!-- Role Selector -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Sign up as</label>
+                <div class="d-flex gap-3">
+                    <!-- Owner Card -->
+                    <div class="flex-fill">
+                        <input type="radio" class="btn-check" name="role" id="role-owner" value="owner" required>
+                        <label class="btn btn-outline-dark w-100 py-3 text-start rounded-3" for="role-owner">
+                            <div class="fw-bold mb-1">🏠 Owner</div>
+                            <small class="text-muted">Add, edit & delete your listings</small>
+                        </label>
+                    </div>
+                    <!-- User Card -->
+                    <div class="flex-fill">
+                        <input type="radio" class="btn-check" name="role" id="role-user" value="user" required>
+                        <label class="btn btn-outline-dark w-100 py-3 text-start rounded-3" for="role-user">
+                            <div class="fw-bold mb-1">👤 User</div>
+                            <small class="text-muted">Browse listings & write reviews</small>
+                        </label>
+                    </div>
+                </div>
+                <div class="invalid-feedback d-block" id="role-error" style="display:none !important;"></div>
+            </div>
+
             <button class="btn btn-success">Sign Up</button>
         </form>
     </div>
 </div>
+
+<script>
+// Ensure a role is selected before submitting
+document.querySelector('form').addEventListener('submit', function(e) {
+    const roleSelected = document.querySelector('input[name="role"]:checked');
+    if (!roleSelected) {
+        e.preventDefault();
+        document.getElementById('role-error').textContent = 'Please select a role.';
+        document.getElementById('role-error').style.display = 'block';
+    }
+});
+</script>

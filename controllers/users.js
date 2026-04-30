@@ -6,14 +6,14 @@ module.exports.renderSignupForm = (req, res) => {
 
 module.exports.signup = async (req, res, next) => {
     try {
-        let { username, email, password } = req.body;
-        const newUser = new User({ email, username });
+        let { username, email, password, role } = req.body;
+        const newUser = new User({ email, username, role });
         const registeredUser = await User.register(newUser, password);
         req.login(registeredUser, (err) => {
             if (err) {
                 return next(err);
             }
-            req.flash("success", "Welcome to Wanderlust!");
+            req.flash("success", `Welcome to Wanderlust! You are logged in as ${role === 'owner' ? 'an Owner' : 'a User'}.`);
             res.redirect("/listings");
         });
     } catch (e) {
